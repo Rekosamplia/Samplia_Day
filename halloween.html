@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halloween · Samplia</title>
+<style>
+/* Animación de Halloween (31 oct). Autocontenida: sin fuentes ni recursos externos salvo el logo opcional. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#12041C;overflow:hidden}
+.s{position:relative;width:100%;height:100%;overflow:hidden;font-family:"Arial Black",Impact,system-ui,sans-serif;color:#FFF4E6}
+svg.bg{position:absolute;inset:0;width:100%;height:100%}
+svg.bg *{transform-box:fill-box;transform-origin:center}
+.moon{animation:glow 4s ease-in-out infinite}
+.cloud{animation:drift 18s linear infinite}.cloud.b{animation-duration:26s;animation-delay:-9s}
+.fog{animation:fog 12s ease-in-out infinite alternate}.fog.b{animation-duration:16s;animation-direction:alternate-reverse}
+.bat{animation:batfly 7s linear infinite}.bat.b{animation-duration:9s;animation-delay:-3s}.bat.c{animation-duration:6s;animation-delay:-5s}
+.wing{animation:flap .22s ease-in-out infinite alternate}
+.pk{animation:bob 2.4s ease-in-out infinite;transform-origin:50% 100%!important}
+.fl{animation:flick .12s steps(2) infinite alternate}
+.halo{animation:halo 1.6s ease-in-out infinite}
+.spider{animation:spider 5s ease-in-out infinite;transform-origin:50% 0!important}
+.star{animation:tw 2.4s ease-in-out infinite}.star:nth-child(2n){animation-delay:-1.2s}.star:nth-child(3n){animation-delay:-.6s}
+@keyframes glow{50%{filter:drop-shadow(0 0 40px #FFD9A0)}}
+@keyframes drift{from{transform:translateX(-30%)}to{transform:translateX(130%)}}
+@keyframes fog{from{transform:translateX(-6%)}to{transform:translateX(6%)}}
+@keyframes batfly{0%{transform:translate(-12vw,10vh) scale(.6)}50%{transform:translate(50vw,-6vh) scale(1)}100%{transform:translate(112vw,12vh) scale(.7)}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(-.4)}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-3%) rotate(2deg)}}
+@keyframes flick{from{opacity:1}to{opacity:.75}}
+@keyframes halo{50%{opacity:.55;transform:scale(1.08)}}
+@keyframes spider{0%,100%{transform:translateY(-40%)}50%{transform:translateY(30%)}}
+@keyframes tw{50%{opacity:.2}}
+
+.t{position:absolute;left:6%;top:12%;width:52%;z-index:2}
+.k{font:700 clamp(10px,1.5vw,18px)/1 system-ui,sans-serif;letter-spacing:.4em;color:#FFB15C;text-transform:uppercase;opacity:0;animation:in .8s .2s forwards}
+.h{font-size:clamp(40px,9.5vw,150px);line-height:.9;letter-spacing:-.01em;margin-top:.15em;
+  background:linear-gradient(180deg,#FFE0A3,#FF8A1F 55%,#E8590C);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 24px rgba(255,120,20,.45));opacity:0;animation:pop .9s .4s cubic-bezier(.2,1.4,.4,1) forwards}
+.sub{font:700 clamp(14px,2.4vw,34px)/1.2 system-ui,sans-serif;margin-top:.5em;opacity:0;animation:in .8s 1s forwards}
+.sub b{color:#FF8A1F}
+.stk{position:absolute;right:7%;top:10%;width:clamp(80px,14vw,200px);aspect-ratio:1;border-radius:50%;z-index:2;
+  background:#FF8A1F;color:#2B0A3D;display:grid;place-items:center;text-align:center;font-size:clamp(16px,2.8vw,40px);line-height:.95;
+  box-shadow:0 0 0 6px #2B0A3D,0 0 0 9px #FF8A1F,0 18px 40px rgba(0,0,0,.4);transform:scale(0) rotate(-30deg);animation:stk 1s 1.4s cubic-bezier(.2,1.6,.4,1) forwards,wob 3s 2.4s ease-in-out infinite}
+.stk small{display:block;font:800 clamp(8px,1.1vw,15px)/1.2 system-ui,sans-serif;letter-spacing:.12em}
+.logo{position:absolute;left:6%;bottom:7%;height:clamp(18px,3vw,40px);z-index:2;opacity:0;animation:in .8s 1.6s forwards}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6) translateY(20px)}to{opacity:1;transform:none}}
+@keyframes stk{to{transform:scale(1) rotate(-12deg)}}
+@keyframes wob{0%,100%{transform:scale(1) rotate(-12deg)}50%{transform:scale(1.06) rotate(-6deg)}}
+/* ?still=1: fotograma fijo (para exportar imagen) */
+body.still *{animation-play-state:paused!important;animation-delay:-3.3s!important}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+<div class="s">
+<svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12041C"/><stop offset=".55" stop-color="#3A0C4F"/><stop offset=".85" stop-color="#9C2F2F"/><stop offset="1" stop-color="#FF7A1A"/></linearGradient>
+    <radialGradient id="mg"><stop offset="0" stop-color="#FFF6DA"/><stop offset=".7" stop-color="#FFE3A3"/><stop offset="1" stop-color="#F5C46B"/></radialGradient>
+    <radialGradient id="pg" cx=".5" cy=".55"><stop offset="0" stop-color="#FFE066"/><stop offset=".5" stop-color="#FF8A1F" stop-opacity=".55"/><stop offset="1" stop-color="#FF8A1F" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <g fill="#FFF4E6"><circle class="star" cx="180" cy="90" r="2"/><circle class="star" cx="420" cy="160" r="1.6"/><circle class="star" cx="760" cy="70" r="2.2"/><circle class="star" cx="980" cy="200" r="1.5"/><circle class="star" cx="1380" cy="120" r="2"/><circle class="star" cx="1500" cy="260" r="1.4"/><circle class="star" cx="620" cy="260" r="1.4"/></g>
+  <circle class="moon" cx="1180" cy="300" r="150" fill="url(#mg)"/>
+  <g fill="#E9C77F" opacity=".5"><circle cx="1130" cy="260" r="24"/><circle cx="1230" cy="350" r="16"/><circle cx="1200" cy="230" r="10"/></g>
+  <g class="cloud" fill="#2B0A3D" opacity=".75"><ellipse cx="300" cy="320" rx="160" ry="34"/><ellipse cx="380" cy="300" rx="90" ry="34"/></g>
+  <g class="cloud b" fill="#2B0A3D" opacity=".6"><ellipse cx="200" cy="200" rx="120" ry="24"/><ellipse cx="260" cy="186" rx="70" ry="26"/></g>
+  <!-- colinas, árbol y lápidas -->
+  <path d="M0 720C260 640 520 700 760 660s520-90 840 10V900H0z" fill="#22072F"/>
+  <path d="M0 790c300-60 600-20 900-50s500 0 700 30V900H0z" fill="#14041C"/>
+  <g stroke="#14041C" stroke-linecap="round" fill="none"><path d="M1400 730c-6-120 6-200-10-300" stroke-width="34"/><path d="M1394 540c-44-34-76-50-104-96" stroke-width="16"/><path d="M1398 480c42-36 74-54 100-100" stroke-width="14"/><path d="M1390 440c-8-46-28-76-58-98" stroke-width="10"/><path d="M1470 412l32-40M1300 452l-34-12M1340 350l-10-30" stroke-width="7"/></g>
+  <g fill="#1B0626"><path d="M220 760v-60a30 30 0 0 1 60 0v60z"/><path d="M320 770v-40a22 22 0 0 1 44 0v40z"/></g>
+  <!-- calabaza -->
+  <g class="pk">
+    <circle class="halo" cx="800" cy="700" r="210" fill="url(#pg)"/>
+    <ellipse cx="730" cy="710" rx="80" ry="100" fill="#E8590C"/><ellipse cx="870" cy="710" rx="80" ry="100" fill="#E8590C"/><ellipse cx="800" cy="710" rx="92" ry="110" fill="#FF7A1A"/>
+    <path d="M790 600c0-30 10-50 34-60l8 14c-18 8-24 24-24 46z" fill="#2F9E44"/>
+    <g class="fl" fill="#FFE066"><path d="M735 690l34-36 34 36zM797 690l34-36 34 36z"/><path d="M730 740c40 40 100 40 140 0l-18 34-20-14-18 18-20-18-18 18-20-18-18 14z"/></g>
+  </g>
+  <!-- niebla -->
+  <path class="fog" d="M-100 820c200-40 400 10 600-10s400-40 600 0 400 20 600-10V900H-100z" fill="#EDE0FF" opacity=".05"/>
+  <path class="fog b" d="M-100 850c240-30 420 20 640-6s380-30 620 6 360 10 540-14V900H-100z" fill="#EDE0FF" opacity=".06"/>
+  <!-- araña -->
+  <g class="spider"><path d="M1460 0v300" stroke="#EDE0FF" stroke-width="1.5" opacity=".5"/><circle cx="1460" cy="310" r="16" fill="#0B0312"/><path d="M1446 304l-22-14M1446 312l-24 0M1446 320l-22 14M1474 304l22-14M1474 312l24 0M1474 320l22 14" stroke="#0B0312" stroke-width="3"/></g>
+</svg>
+<!-- murciélagos -->
+<svg class="bat" style="position:absolute;left:0;top:18%;width:7vw" viewBox="0 0 100 40" aria-hidden="true"><g fill="#0B0312"><path class="wing" d="M50 20C38 4 18 2 0 10c10 4 14 10 12 18 8-6 18-4 24 2 4-6 8-8 14-10z" style="transform-box:fill-box;transform-origin:100% 60%"/><path class="wing" d="M50 20c12-16 32-18 50-10-10 4-14 10-12 18-8-6-18-4-24 2-4-6-8-8-14-10z" style="transform-box:fill-box;transform-origin:0 60%"/><ellipse cx="50" cy="22" rx="6" ry="9"/></g></svg>
+<svg class="bat b" style="position:absolute;left:0;top:30%;width:5vw" viewBox="0 0 100 40" aria-hidden="true"><g fill="#0B0312"><path class="wing" d="M50 20C38 4 18 2 0 10c10 4 14 10 12 18 8-6 18-4 24 2 4-6 8-8 14-10z" style="transform-box:fill-box;transform-origin:100% 60%"/><path class="wing" d="M50 20c12-16 32-18 50-10-10 4-14 10-12 18-8-6-18-4-24 2-4-6-8-8-14-10z" style="transform-box:fill-box;transform-origin:0 60%"/><ellipse cx="50" cy="22" rx="6" ry="9"/></g></svg>
+<svg class="bat c" style="position:absolute;left:0;top:8%;width:4vw" viewBox="0 0 100 40" aria-hidden="true"><g fill="#0B0312"><path class="wing" d="M50 20C38 4 18 2 0 10c10 4 14 10 12 18 8-6 18-4 24 2 4-6 8-8 14-10z" style="transform-box:fill-box;transform-origin:100% 60%"/><path class="wing" d="M50 20c12-16 32-18 50-10-10 4-14 10-12 18-8-6-18-4-24 2-4-6-8-8-14-10z" style="transform-box:fill-box;transform-origin:0 60%"/><ellipse cx="50" cy="22" rx="6" ry="9"/></g></svg>
+
+<div class="t">
+  <div class="k">Sábado · 31 de octubre</div>
+  <div class="h">HALLO<br>WEEN</div>
+  <div class="sub">Descuentos <b>de miedo</b>.<br>Solo 24 horas.</div>
+</div>
+<div class="stk"><div>31·10<small>UNA MARCA</small></div></div>
+<img class="logo" src="assets/brand/samplia-logo-white.png" alt="Samplia">
+</div>
+<script>if(/still=1/.test(location.search))document.body.classList.add('still')</script>
+</body>
+</html>

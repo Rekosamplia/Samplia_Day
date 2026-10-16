@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentos de marca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@600;700&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /*
+   * Tarjetas animadas de días mundiales (datos en eventos.js).
+   *   eventos.html                 → cuadrícula con todas las tarjetas animadas
+   *   eventos.html?id=2026-10-31   → una tarjeta a pantalla completa
+   *   …&still=1                    → animación congelada (para exportar imágenes)
+   */
+  :root { --bg: #0E0508; --ink: #FBF4F2; --muted: #B8949B; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; min-height: 100vh; }
+  header { padding: 32px 16px 8px; max-width: 1200px; margin: 0 auto; }
+  header h1 { font-family: Poppins, sans-serif; font-size: clamp(26px, 5vw, 44px); line-height: 1.1; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto; }
+  .seasons { display: flex; gap: 12px; flex-wrap: wrap; padding: 8px 16px 0; max-width: 1200px; margin: 0 auto; }
+  .seasons span { background: #2A0E15; border-radius: 999px; padding: 8px 14px; font-size: 13px; color: #FFC9D2; }
+
+  /* ---------- Tarjeta ---------- */
+  .card { --w: 100%; position: relative; aspect-ratio: 1; border-radius: 6%; overflow: hidden; container-type: inline-size;
+    background: linear-gradient(160deg, var(--c1), var(--c2)); color: var(--cink); }
+  .card .glow { position: absolute; inset: 0; background: radial-gradient(55% 45% at 50% 34%, rgba(255,255,255,.28), transparent 70%); }
+  .card svg.m { position: absolute; left: 50%; top: 6%; width: 58%; height: 58%; transform: translateX(-50%); overflow: visible; }
+  .card .txt { position: absolute; left: 7%; right: 7%; bottom: 6.5%; display: flex; flex-direction: column; gap: 1.6cqw; }
+  .card .date { align-self: flex-start; font: 700 3.6cqw/1 Inter, sans-serif; letter-spacing: .12em; text-transform: uppercase;
+    padding: 1.6cqw 2.6cqw; border-radius: 99px; background: rgba(0,0,0,.22); }
+  .card.light .date { background: rgba(255,255,255,.55); }
+  .card .name { font: 700 6.4cqw/1.12 Poppins, sans-serif; letter-spacing: -.01em; text-wrap: balance; }
+  .card .fit { font: 500 3.6cqw/1.3 Inter, sans-serif; opacity: .85; }
+  .card .brand { position: absolute; right: 6%; top: 5.5%; height: 6.2cqw; width: auto; opacity: .95; }
+
+  /* Vista individual */
+  body.single { display: grid; place-items: center; height: 100vh; overflow: hidden; }
+  body.single header, body.single .seasons { display: none; }
+  body.single .grid { display: block; padding: 0; width: min(100vw, 100vh); }
+  body.single .card { border-radius: 0; }
+  /* Congelado para exportar: todas las animaciones en un punto fijo */
+  body.still *, body.still *::before, body.still *::after { animation-play-state: paused !important; animation-delay: var(--still, -1.1s) !important; }
+
+  /* ---------- Biblioteca de animaciones (SVG) ---------- */
+  svg.m [class] { transform-box: fill-box; transform-origin: center; }
+  .float  { animation: float 3s ease-in-out infinite; }
+  .swing  { animation: swing 2.6s ease-in-out infinite; transform-origin: 50% 100% !important; }
+  .spin   { animation: spin 6s linear infinite; }
+  .rspin  { animation: spin 1.4s linear infinite reverse; }
+  .rspin2 { animation: spin 8s linear infinite reverse; }
+  .pulse  { animation: pulse 1.6s ease-in-out infinite; }
+  .beat   { animation: beat 1.2s ease-in-out infinite; }
+  .blink  { animation: blink 3.2s steps(1) infinite; }
+  .twinkle{ animation: twinkle 1.8s ease-in-out infinite; }
+  .flicker{ animation: flicker .9s ease-in-out infinite alternate; transform-origin: 50% 100% !important; }
+  .rise   { animation: rise 2.4s ease-in infinite; }
+  .steam  { stroke-dasharray: 60; animation: steam 2.4s ease-in-out infinite; }
+  .draw   { stroke-dasharray: 600; animation: draw 3.6s ease-in-out infinite; }
+  .bounce { animation: bounce 1.4s cubic-bezier(.3,0,.3,1) infinite; }
+  .lid    { animation: lid 2s ease-in-out infinite; }
+  .lift   { animation: lift 1.6s ease-in-out infinite; }
+  .ripple { animation: ripple 2.4s ease-out infinite; }
+  .grow   { animation: grow 2.8s ease-in-out infinite; transform-origin: 50% 100% !important; }
+  .drop1  { animation: stack 2.8s ease-in-out infinite; }
+  .fly    { animation: fly 4s ease-in-out infinite; }
+  .neon   { animation: neon 2.2s linear infinite; }
+  .slosh  { animation: slosh 2.4s ease-in-out infinite; transform-origin: 50% 0 !important; }
+  .wave   { animation: wave 1.6s steps(1) infinite; }
+  .d1 { animation-delay: -.3s; } .d2 { animation-delay: -.6s; } .d3 { animation-delay: -.9s; } .d4 { animation-delay: -1.2s; } .d5 { animation-delay: -1.5s; }
+  @keyframes float { 50% { transform: translateY(-6%); } }
+  @keyframes swing { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 50% { transform: scale(1.12); opacity: .85; } }
+  @keyframes beat { 0%,100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(1); } 45% { transform: scale(1.12); } }
+  @keyframes blink { 0%,90% { transform: scaleY(1); } 92%,96% { transform: scaleY(.1); } }
+  @keyframes twinkle { 50% { transform: scale(.35) rotate(45deg); opacity: .4; } }
+  @keyframes flicker { 0% { transform: scale(1,1) skewX(0); } 50% { transform: scale(.92,1.08) skewX(3deg); } 100% { transform: scale(1.05,.94) skewX(-3deg); } }
+  @keyframes rise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-260%) scale(1); opacity: 0; } }
+  @keyframes steam { 0% { stroke-dashoffset: 60; opacity: 0; } 40% { opacity: .9; } 100% { stroke-dashoffset: -60; opacity: 0; } }
+  @keyframes draw { 0% { stroke-dashoffset: 600; } 45%,75% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -600; } }
+  @keyframes bounce { 0%,100% { transform: translateY(0) scale(1,1); } 45% { transform: translateY(-14%) scale(.96,1.04); } 85% { transform: translateY(0) scale(1.06,.94); } }
+  @keyframes lid { 0%,40%,100% { transform: translateY(0) rotate(0); } 60% { transform: translateY(-30%) rotate(-10deg); } 75% { transform: translateY(-24%) rotate(6deg); } }
+  @keyframes lift { 0%,100% { transform: translateY(18%); } 50% { transform: translateY(-18%); } }
+  @keyframes ripple { 0% { transform: scale(.4); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+  @keyframes grow { 0%,100% { transform: scale(.85); } 50% { transform: scale(1.08); } }
+  @keyframes stack { 0% { transform: translateY(-120%); opacity: 0; } 20%,85% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
+  @keyframes fly { 0% { transform: translate(-60%, 20%) scale(.7); } 50% { transform: translate(40%, -30%) scale(1); } 100% { transform: translate(140%, 10%) scale(.7); } }
+  @keyframes neon { 0%,18%,22%,62%,64%,100% { opacity: 1; filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 18px currentColor); } 20%,63% { opacity: .35; filter: none; } }
+  @keyframes slosh { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+  @keyframes wave { 0% { opacity: 1; } 25% { opacity: .15; } 50% { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Momentos de marca · 16 oct – 15 nov 2026</h1>
+  <p>Un día mundial o evento por día, con los sectores que mejor encajan.</p>
+</header>
+<div class="seasons" id="seasons"></div>
+<main class="grid" id="grid"></main>
+
+<script src="eventos.js"></script>
+<script>
+(() => {
+  // Cada motivo: SVG 200×200 con clases de animación de la biblioteca de arriba. W = color claro, K = sombra.
+  const W = "rgba(255,255,255,.95)", K = "rgba(0,0,0,.28)";
+  const M = {
+    food: `<ellipse cx="100" cy="150" rx="72" ry="14" fill="${K}"/><path d="M38 112h124a62 40 0 0 1-124 0z" fill="${W}"/>
+      <path class="steam" d="M78 92c-10-14 10-22 0-38" stroke="${W}" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path class="steam d2" d="M100 88c-10-14 10-22 0-38" stroke="${W}" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path class="steam d4" d="M122 92c-10-14 10-22 0-38" stroke="${W}" stroke-width="7" fill="none" stroke-linecap="round"/>`,
+    sparkle: `<path class="spin" d="M100 30l14 56 56 14-56 14-14 56-14-56-56-14 56-14z" fill="${W}"/>
+      <path class="twinkle d1" d="M40 40l5 15 15 5-15 5-5 15-5-15-15-5 15-5z" fill="#FFE066"/>
+      <path class="twinkle d3" d="M160 140l5 15 15 5-15 5-5 15-5-15-15-5 15-5z" fill="#FFE066"/>
+      <path class="twinkle d5" d="M165 35l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="${W}"/>`,
+    leaf: `<g class="swing"><path d="M100 175C40 150 40 60 140 30c20 80-10 130-40 145z" fill="${W}"/><path d="M100 175C110 120 120 80 140 30" stroke="rgba(30,94,58,.6)" stroke-width="5" fill="none"/></g>
+      <path class="fly" d="M30 60c10-10 26-6 30 6-12 8-26 6-30-6z" fill="rgba(255,255,255,.6)"/>`,
+    ribbon: `<path class="draw" d="M100 70c-30-40 50-40 20 0L60 170M100 70c30-40-50-40-20 0l60 100" stroke="${W}" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+    chef: `<g class="bounce"><circle cx="70" cy="80" r="30" fill="${W}"/><circle cx="100" cy="64" r="36" fill="${W}"/><circle cx="130" cy="80" r="30" fill="${W}"/>
+      <rect x="62" y="84" width="76" height="60" rx="6" fill="${W}"/><rect x="62" y="132" width="76" height="16" rx="4" fill="rgba(200,200,200,.9)"/></g>`,
+    bulb: `<circle class="pulse" cx="100" cy="86" r="70" fill="rgba(255,255,255,.35)"/><path d="M100 30a50 50 0 0 1 28 92v18H72v-18a50 50 0 0 1 28-92z" fill="${W}"/>
+      <rect x="74" y="146" width="52" height="10" rx="5" fill="rgba(60,40,0,.55)"/><rect x="80" y="160" width="40" height="10" rx="5" fill="rgba(60,40,0,.55)"/>`,
+    herb: `<g class="swing"><path d="M100 120C80 90 70 60 92 40c14 20 16 50 8 80z" fill="${W}"/><path d="M104 120c10-30 30-50 56-50-6 26-30 46-56 50z" fill="rgba(255,255,255,.75)"/></g>
+      <path d="M50 118h100l-12 52H62z" fill="rgba(255,255,255,.9)"/><rect x="44" y="110" width="112" height="14" rx="7" fill="${W}"/>`,
+    bubbles: `<path d="M84 30h32l-4 70a12 12 0 0 1-24 0z" fill="rgba(255,255,255,.85)"/><rect x="97" y="100" width="6" height="50" fill="${W}"/><ellipse cx="100" cy="154" rx="26" ry="7" fill="${W}"/>
+      <circle class="rise" cx="94" cy="90" r="4" fill="#B08D3C"/><circle class="rise d2" cx="104" cy="92" r="3" fill="#B08D3C"/><circle class="rise d4" cx="99" cy="88" r="3.5" fill="#B08D3C"/>`,
+    earth: `<circle cx="100" cy="100" r="64" fill="rgba(255,255,255,.9)"/><clipPath id="ec"><circle cx="100" cy="100" r="64"/></clipPath>
+      <g clip-path="url(#ec)"><g class="spin"><path d="M60 60c20-10 40 0 36 20s-30 10-40 30-26-30 4-50zM120 120c20-6 40 10 30 30s-40 0-30-30zM110 50c14 0 24 10 16 18s-24-8-16-18z" fill="#2F9E44"/></g></g>
+      <circle class="ripple" cx="100" cy="100" r="64" fill="none" stroke="${W}" stroke-width="3"/>`,
+    clock: `<circle cx="100" cy="100" r="66" fill="${W}"/><circle cx="100" cy="100" r="58" fill="none" stroke="rgba(28,42,107,.25)" stroke-width="3" stroke-dasharray="2 13"/>
+      <rect class="rspin" x="97" y="52" width="6" height="52" rx="3" fill="#1C2A6B" style="transform-origin:50% 92%"/>
+      <rect class="rspin2" x="96" y="72" width="8" height="32" rx="4" fill="#E03131" style="transform-origin:50% 87%"/><circle cx="100" cy="100" r="7" fill="#1C2A6B"/>`,
+    gift: `<rect x="48" y="92" width="104" height="72" rx="8" fill="${W}"/><rect x="92" y="92" width="16" height="72" fill="#C92A2A"/>
+      <g class="lid"><rect x="40" y="72" width="120" height="24" rx="6" fill="${W}"/><rect x="92" y="72" width="16" height="24" fill="#C92A2A"/>
+      <path d="M100 72c-20-30-44-10-24 0zM100 72c20-30 44-10 24 0z" fill="#C92A2A"/></g>`,
+    cat: `<path d="M40 150c0-50 20-80 60-80s60 30 60 80z" fill="#0B0814"/><path d="M52 92l8-46 30 30zM148 92l-8-46-30 30z" fill="#0B0814"/>
+      <ellipse class="blink" cx="78" cy="112" rx="11" ry="14" fill="#FFE066"/><ellipse class="blink" cx="122" cy="112" rx="11" ry="14" fill="#FFE066"/>
+      <ellipse cx="78" cy="112" rx="3" ry="10" fill="#0B0814"/><ellipse cx="122" cy="112" rx="3" ry="10" fill="#0B0814"/>`,
+    play: `<rect class="pulse" x="40" y="50" width="120" height="100" rx="24" fill="${W}"/><path d="M88 78l36 22-36 22z" fill="#5F3DC4"/>
+      <circle class="twinkle" cx="44" cy="40" r="6" fill="#FFE066"/><circle class="twinkle d3" cx="164" cy="160" r="6" fill="#FFE066"/>`,
+    drop: `<circle class="ripple" cx="100" cy="150" r="40" fill="none" stroke="${W}" stroke-width="4"/><circle class="ripple d3" cx="100" cy="150" r="40" fill="none" stroke="${W}" stroke-width="4"/>
+      <path class="float" d="M100 30c26 36 42 58 42 80a42 42 0 0 1-84 0c0-22 16-44 42-80z" fill="${W}"/>`,
+    dumbbell: `<g class="lift"><rect x="44" y="94" width="112" height="12" rx="6" fill="${W}"/><rect x="34" y="70" width="22" height="60" rx="6" fill="${W}"/><rect x="144" y="70" width="22" height="60" rx="6" fill="${W}"/>
+      <rect x="22" y="80" width="14" height="40" rx="5" fill="rgba(255,255,255,.75)"/><rect x="164" y="80" width="14" height="40" rx="5" fill="rgba(255,255,255,.75)"/></g>`,
+    pumpkin: `<path class="fly" d="M20 40c8-8 14-2 18 4 4-6 10-12 18-4-6 0-10 6-18 10-8-4-12-10-18-10z" fill="#1A0526"/>
+      <g class="bounce"><ellipse cx="70" cy="120" rx="36" ry="46" fill="#FF8C1A"/><ellipse cx="130" cy="120" rx="36" ry="46" fill="#FF8C1A"/><ellipse cx="100" cy="120" rx="40" ry="50" fill="#FF9F2E"/>
+      <rect x="94" y="60" width="12" height="20" rx="4" fill="#2F9E44"/>
+      <g class="flicker"><path d="M70 108l14-14 14 14zM102 108l14-14 14 14z" fill="#FFE066"/><path d="M70 136c20 16 40 16 60 0l-10 14-10-8-10 10-10-10-10 8z" fill="#FFE066"/></g></g>`,
+    sprout: `<path d="M60 130h80l-10 40H70z" fill="${W}"/><g class="grow"><path d="M100 130V80" stroke="${W}" stroke-width="7"/>
+      <path d="M100 92c-26 0-40-16-40-36 24 0 40 14 40 36zM100 82c4-26 20-40 44-40 0 24-20 40-44 40z" fill="${W}"/></g>`,
+    candle: `<rect x="80" y="90" width="40" height="80" rx="6" fill="#FFF3E0"/><path d="M100 90v-10" stroke="#5C3D2E" stroke-width="3"/>
+      <circle class="pulse" cx="100" cy="62" r="34" fill="rgba(255,190,90,.25)"/><path class="flicker" d="M100 36c12 16 14 26 14 32a14 14 0 0 1-28 0c0-6 2-16 14-32z" fill="#FFB43B"/>`,
+    sandwich: `<rect class="drop1 d5" x="44" y="132" width="112" height="24" rx="10" fill="#E8B35A"/><rect class="drop1 d4" x="40" y="118" width="120" height="14" rx="7" fill="#69DB7C"/>
+      <rect class="drop1 d3" x="44" y="104" width="112" height="14" rx="4" fill="#FF6B6B"/><rect class="drop1 d2" x="44" y="92" width="112" height="12" rx="4" fill="#FFE066"/>
+      <path class="drop1 d1" d="M44 92c0-30 112-30 112 0z" fill="#E8B35A"/>`,
+    candy: `<g class="spin"><path d="M60 100l-30-22v44zM140 100l30-22v44z" fill="${W}"/><circle cx="100" cy="100" r="42" fill="${W}"/>
+      <path d="M70 80c20 10 40-10 60 10M66 110c24 10 44-12 68 4" stroke="#AE3EC9" stroke-width="8" fill="none" stroke-linecap="round"/></g>`,
+    hands: `<path d="M30 150c20-10 40-6 60 4l10 6M170 150c-20-10-40-6-60 4l-10 6" stroke="${W}" stroke-width="16" fill="none" stroke-linecap="round"/>
+      <path class="beat" d="M100 132C60 104 56 70 80 62c12-4 20 6 20 14 0-8 8-18 20-14 24 8 20 42-20 70z" fill="${W}"/>`,
+    notes: `<g class="float"><path d="M70 140V60l60-16v80" stroke="${W}" stroke-width="8" fill="none"/><ellipse cx="58" cy="142" rx="16" ry="12" fill="${W}"/><ellipse cx="118" cy="126" rx="16" ry="12" fill="${W}"/></g>
+      <path class="rise d2" d="M150 150v-24l14-4" stroke="${W}" stroke-width="5" fill="none"/><circle class="rise d2" cx="146" cy="152" r="7" fill="${W}"/>`,
+    countdown: `<circle cx="100" cy="100" r="66" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="10"/>
+      <circle class="draw" cx="100" cy="100" r="66" fill="none" stroke="${W}" stroke-width="10" stroke-linecap="round"/>
+      <text class="pulse" x="100" y="128" text-anchor="middle" font-family="Anton, sans-serif" font-size="84" fill="${W}">4</text>`,
+    wifi: `<circle cx="100" cy="150" r="10" fill="${W}"/><path class="wave" d="M76 126a34 34 0 0 1 48 0" stroke="${W}" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path class="wave d1" d="M56 104a62 62 0 0 1 88 0" stroke="${W}" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path class="wave d2" d="M36 82a90 90 0 0 1 128 0" stroke="${W}" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M44 44l112 112" stroke="#FF6B6B" stroke-width="12" stroke-linecap="round"/>`,
+    idea: `<circle class="pulse" cx="100" cy="84" r="62" fill="rgba(255,255,255,.25)"/><path d="M100 34a46 46 0 0 1 26 84v16H74v-16a46 46 0 0 1 26-84z" fill="${W}"/>
+      <g class="spin" style="transform-origin:100px 80px"><circle cx="100" cy="80" r="14" fill="none" stroke="#364FC7" stroke-width="8" stroke-dasharray="6 5"/></g>
+      <rect x="78" y="140" width="44" height="10" rx="5" fill="rgba(20,30,90,.5)"/>`,
+    atom: `<circle cx="100" cy="100" r="12" fill="${W}"/><g class="spin"><ellipse cx="100" cy="100" rx="70" ry="24" fill="none" stroke="${W}" stroke-width="5"/><circle cx="170" cy="100" r="7" fill="#FFE066"/></g>
+      <g class="spin d2"><ellipse cx="100" cy="100" rx="70" ry="24" fill="none" stroke="${W}" stroke-width="5" transform="rotate(60 100 100)"/></g>
+      <g class="spin d4"><ellipse cx="100" cy="100" rx="70" ry="24" fill="none" stroke="${W}" stroke-width="5" transform="rotate(-60 100 100)"/></g>`,
+    neon: `<text class="neon" x="100" y="122" text-anchor="middle" font-family="Anton, sans-serif" font-size="70" fill="#FF4FD8" style="color:#FF4FD8">11.11</text>
+      <rect class="neon d3" x="22" y="58" width="156" height="90" rx="18" fill="none" stroke="#4FD8FF" stroke-width="4" style="color:#4FD8FF"/>`,
+    wine: `<g class="slosh"><path d="M64 30h72c0 46-14 66-36 66S64 76 64 30z" fill="rgba(255,255,255,.85)"/><path d="M68 56h64c-2 24-14 36-32 36S70 80 68 56z" fill="#7A0F2C"/></g>
+      <rect x="97" y="96" width="6" height="56" fill="${W}"/><ellipse cx="100" cy="156" rx="28" ry="7" fill="${W}"/>`,
+    heart: `<path class="beat" d="M100 168C40 128 24 84 52 60c18-16 40-6 48 12 8-18 30-28 48-12 28 24 12 68-48 108z" fill="${W}"/>
+      <circle class="ripple" cx="100" cy="104" r="60" fill="none" stroke="${W}" stroke-width="3"/>`,
+    circle: `<circle class="draw" cx="100" cy="100" r="62" fill="none" stroke="#1971C2" stroke-width="22"/>
+      <circle class="ripple" cx="100" cy="100" r="62" fill="none" stroke="#1971C2" stroke-width="3"/>`,
+    zero: `<path d="M62 40h76l-10 120H72z" fill="rgba(255,255,255,.85)"/><path d="M66 74h68l-7 82H73z" fill="rgba(4,51,42,.25)"/>
+      <text x="100" y="128" text-anchor="middle" font-family="Anton, sans-serif" font-size="40" fill="#04332A">0,0</text>
+      <circle class="rise" cx="86" cy="150" r="4" fill="${W}"/><circle class="rise d2" cx="110" cy="150" r="3" fill="${W}"/><circle class="rise d4" cx="98" cy="150" r="3.5" fill="${W}"/>`
+  };
+
+  const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+
+  const card = e => {
+    const d = parse(e.date);
+    const date = d.toLocaleDateString("es-ES", { day: "numeric", month: "short", weekday: "short" }).replace(",", " ·");
+    const lum = hex => { const n = parseInt(hex.slice(1), 16); return 0.299 * (n >> 16) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255); };
+    const lightBg = (lum(e.c1) + lum(e.c2)) / 2 > 150;   // fondo claro → logo y etiqueta oscuros
+    const darkInk = lum(e.ink) < 150;                   // texto oscuro → etiqueta de fecha clara
+    return `<article class="card ${darkInk ? "light" : ""}" style="--c1:${e.c1};--c2:${e.c2};--cink:${e.ink}" aria-label="${e.name}, ${date}">
+      <div class="glow"></div>
+      <img class="brand" src="assets/brand/${lightBg ? "samplia-logo.png" : "samplia-logo-white.png"}" alt="Samplia">
+      <svg class="m" viewBox="0 0 200 200" aria-hidden="true">${M[e.motif] || ""}</svg>
+      <div class="txt"><span class="date">${date}</span><div class="name">${e.name}</div><div class="fit">${e.fit}</div></div>
+    </article>`;
+  };
+
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
+  if (params.get("still") === "1") document.body.classList.add("still");
+  if (id) {
+    document.body.classList.add("single");
+    const e = EVENTS.find(x => x.date === id);
+    document.getElementById("grid").innerHTML = e ? card(e) : "";
+  } else {
+    document.getElementById("grid").innerHTML = EVENTS.map(card).join("");
+    document.getElementById("seasons").innerHTML = SEASONS.map(s => `<span><b>${s.name}</b> · ${s.range} · ${s.fit}</span>`).join("");
+  }
+})();
+</script>
+</body>
+</html>

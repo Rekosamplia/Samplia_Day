@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Samplia 30 Días</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000; --ink: #fff;
+    --sheet: #ffffff; --sheet-ink: #111; --muted: #6b6b6b; --line: #ececec; --chip: #f4f4f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --sheet: #141414; --sheet-ink: #f2f2f2; --muted: #9a9a9a; --line: #262626; --chip: #1f1f1f; }
+  }
+  :root[data-theme="dark"] { --sheet: #141414; --sheet-ink: #f2f2f2; --muted: #9a9a9a; --line: #262626; --chip: #1f1f1f; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    transition: background .5s ease, color .5s ease;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* ---------- Pantalla del día ---------- */
+  .stage {
+    position: relative; height: 100dvh; max-width: 560px; margin: 0 auto;
+    display: grid; grid-template-rows: auto 1fr 33.333dvh;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+  /* Foto de fondo a pantalla completa + velo con el color de la marca */
+  .photo { position: fixed; inset: 0; overflow: hidden; background: var(--bg); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; animation: kenburns 24s ease-in-out infinite alternate; opacity: 0; transition: opacity .8s ease; }
+  .photo img.ready { opacity: 1; }
+  .photo::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--bg) 55%, transparent) 0%,
+        color-mix(in srgb, var(--bg) 25%, transparent) 30%,
+        color-mix(in srgb, var(--bg) 70%, transparent) 55%,
+        var(--bg) 74%);
+  }
+  @keyframes kenburns { from { transform: scale(1.04); } to { transform: scale(1.16) translate(-2%, -2%); } }
+
+  .top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; position: relative; text-shadow: 0 1px 8px rgba(0,0,0,.25); }
+  /* Logotipo horizontal original (página 1 de LOGOS SAMPLIA.ai); versión de texto blanco o negro según la oferta */
+  .samplia { height: 30px; width: auto; display: block; filter: drop-shadow(0 1px 6px rgba(0,0,0,.2)); }
+  .top .when { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .top .when #today { opacity: .8; font-size: 11px; }
+  .top .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 8px; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+
+  .hero { display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; position: relative; min-height: 0; padding-bottom: 8px; }
+  .logo {
+    height: 64px; max-width: 72%; padding: 12px 18px; border-radius: 18px; background: #fff;
+    display: flex; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,.25); margin-bottom: 18px;
+  }
+  .logo.dark { background: #141414; }
+  .logo img { height: 100%; max-width: 100%; object-fit: contain; display: block; }
+  .big {
+    font-family: Anton, Impact, sans-serif; line-height: .86; letter-spacing: -.01em;
+    font-size: clamp(96px, 34vw, 230px); white-space: nowrap; text-shadow: 0 6px 30px rgba(0,0,0,.25);
+  }
+  .tag { font-size: 17px; font-weight: 700; opacity: .9; margin-top: 10px; }
+  .enter .logo, .enter .big, .enter .tag { animation: rise .7s cubic-bezier(.2,.8,.2,1) both; }
+  .enter .big { animation-delay: .08s; } .enter .tag { animation-delay: .16s; }
+  @keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+
+  .bottom { display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; position: relative; }
+  .timer { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; }
+  .timer b { font-variant-numeric: tabular-nums; font-weight: 800; letter-spacing: .04em; }
+  .info { width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; font-weight: 800; font-size: 14px; display: grid; place-items: center; opacity: .85; }
+  .btn {
+    height: 64px; border-radius: 20px; font-size: 18px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: transform .12s ease;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .btn.ghost { border: 2px solid currentColor; }
+  .btn svg { width: 22px; height: 22px; }
+
+  /* ---------- Ofertas en tienda física (drive to store) ---------- */
+  .store-pill { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; padding: 6px 12px 6px 9px; border-radius: 999px;
+    background: var(--ink); color: var(--bg); font: 800 12px/1 Inter, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+  .store-pill svg, .btn .ico { width: 16px; height: 16px; }
+  .st-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 6px; border-radius: 6px; background: var(--sheet-ink); color: var(--sheet); }
+  .st-tag svg { width: 11px; height: 11px; }
+  .cell .shop { position: absolute; top: 3px; right: 3px; width: 15px; height: 15px; border-radius: 5px; background: rgba(255,255,255,.95); color: #111; display: grid; place-items: center; }
+  .cell .shop svg { width: 10px; height: 10px; }
+  .cell { position: relative; }
+
+  /* Pantalla del QR: tarjeta clara para que el lector de caja lo lea bien */
+  .qr { position: fixed; inset: 0; z-index: 55; display: grid; place-items: center; padding: 16px; opacity: 0; pointer-events: none;
+    background: rgba(10,4,6,.82); backdrop-filter: blur(6px); transition: opacity .25s ease; }
+  .qr.on { opacity: 1; pointer-events: auto; }
+  .qr .card { width: min(100%, 360px); background: #FFFFFF; color: #141414; border-radius: 28px; padding: 22px 22px 18px; text-align: center;
+    transform: translateY(20px) scale(.97); transition: transform .3s cubic-bezier(.2,.8,.2,1); box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  .qr.on .card { transform: none; }
+  .qr .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .qr .head img { height: 30px; max-width: 150px; object-fit: contain; }
+  .qr .head .big3 { font-family: Anton, sans-serif; font-size: 34px; line-height: 1; }
+  .qr .code-box { margin: 16px auto 10px; width: min(100%, 250px); aspect-ratio: 1; border-radius: 18px; padding: 12px; border: 3px solid var(--qr, #E82E45); display: grid; place-items: center; }
+  .qr .code-box svg { width: 100%; height: 100%; display: block; }
+  .qr .code-txt { font: 800 15px/1 Inter, monospace; letter-spacing: .12em; }
+  .qr .where { margin-top: 10px; font-size: 14px; font-weight: 600; color: #444; }
+  .qr .valid { margin-top: 4px; font-size: 13px; color: #6b6b6b; }
+  .qr .demo { margin-top: 8px; font-size: 11px; color: #9a9a9a; }
+  .qr .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .qr .acts a, .qr .acts button { height: 48px; border-radius: 14px; font-weight: 800; font-size: 15px; display: grid; place-items: center; text-decoration: none; }
+  .qr .acts a { background: #F1F1F1; color: #141414; }
+  .qr .acts button { background: #141414; color: #FFFFFF; }
+
+  /* ---------- Loader: logo 3D girando mientras se abre la tienda ---------- */
+  .loader {
+    position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; opacity: 0; pointer-events: none;
+    background: radial-gradient(60% 45% at 50% 38%, #5A1020 0%, #1C060C 55%, #0B0306 100%);
+    transition: opacity .25s ease; perspective: 900px;
+  }
+  .loader.on { opacity: 1; pointer-events: auto; }
+  .loader .box { display: flex; flex-direction: column; align-items: center; gap: 28px; transform-style: preserve-3d; }
+  .loader .obj { position: relative; width: 112px; height: 112px; transform-style: preserve-3d; animation: lspin 1.4s cubic-bezier(.65,0,.35,1) infinite; }
+  .loader .obj img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .loader .obj .side { filter: brightness(.42) saturate(1.2); }
+  .loader .obj .back { transform: translateZ(-18px) rotateY(180deg); }
+  .loader .obj .front, .loader .obj .back, .loader .shine { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .loader .shine { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+    -webkit-mask: url(assets/brand/samplia-icon.png) center / contain no-repeat; mask: url(assets/brand/samplia-icon.png) center / contain no-repeat;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,240,244,.8) 50%, transparent 65%); background-size: 300% 100%;
+    animation: lshine 1.4s ease-in-out infinite; }
+  .loader .floor { width: 90px; height: 14px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.7), transparent);
+    animation: lfloor 1.4s cubic-bezier(.65,0,.35,1) infinite; margin-top: -10px; }
+  .loader .wordmark { width: 150px; height: auto; display: block; margin-top: -14px; filter: brightness(0) invert(1); }
+  .loader .msg { color: #FBEDEF; font-weight: 700; font-size: 17px; letter-spacing: -.01em; text-align: center; }
+  .loader .msg small { display: block; margin-top: 6px; font-weight: 600; font-size: 13px; color: #FF9AAA; letter-spacing: .02em; }
+  .loader .bar { width: 120px; height: 3px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .loader .bar i { display: block; height: 100%; width: 0; background: #E82E45; }
+  .loader.on .bar i { animation: lbar var(--dur, 1300ms) cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes lspin { 0% { transform: rotateY(0) translateY(0); } 50% { transform: rotateY(180deg) translateY(-10px); } 100% { transform: rotateY(360deg) translateY(0); } }
+  @keyframes lfloor { 50% { transform: scale(.7); opacity: .6; } }
+  @keyframes lshine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+  @keyframes lbar { to { width: 100%; } }
+  @media (prefers-reduced-motion: reduce) { .loader .obj, .loader .shine, .loader .floor { animation: none; } }
+
+  /* ---------- Hoja inferior ---------- */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.45); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 10; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 560px;
+    max-height: 88dvh; background: var(--sheet); color: var(--sheet-ink);
+    border-radius: 28px 28px 0 0; transform: translateY(105%); transition: transform .35s cubic-bezier(.2,.8,.2,1);
+    z-index: 20; display: flex; flex-direction: column;
+    padding: 10px 16px max(20px, env(safe-area-inset-bottom));
+  }
+  .sheet.open { transform: none; }
+  .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 14px; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+  .seg { display: flex; background: var(--chip); border-radius: 12px; padding: 3px; }
+  .seg button { padding: 8px 14px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .seg button.on { background: var(--sheet); color: var(--sheet-ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  /* Carrusel de semanas / meses: deslizar en vertical, sin barra de scroll visible */
+  .vwrap { position: relative; margin: 0 -16px; }
+  .pager { overflow-y: auto; overflow-x: hidden; scroll-snap-type: y mandatory; overscroll-behavior: contain;
+    scrollbar-width: none; -ms-overflow-style: none; outline: none; height: var(--ph, auto); }
+  .pager::-webkit-scrollbar { display: none; }
+  .page { height: var(--ph, auto); scroll-snap-align: start; scroll-snap-stop: always; padding: 2px 26px 4px 16px; box-sizing: border-box; }
+  .dots { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+  .dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--line); transition: height .25s ease, background .25s ease; }
+  .dots i.on { height: 18px; background: var(--sheet-ink); }
+  .range { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 10px; }
+  .range::first-letter { text-transform: uppercase; }
+  .body { overflow-y: auto; margin: 0 -16px; padding: 0 16px; }
+
+  .week { display: grid; gap: 8px; }
+  .row {
+    display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 12px;
+    padding: 10px; border-radius: 16px; background: var(--chip); text-align: left; width: 100%;
+  }
+  .row .d { text-align: center; line-height: 1.05; }
+  .row .d small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+  .row .d b { font-size: 22px; font-weight: 800; }
+  .row .sw { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .row .chipc { width: 48px; height: 48px; border-radius: 12px; flex: none; display: grid; place-items: center; background: #fff; padding: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
+  .row .chipc.dark { background: #141414; }
+  .row .chipc img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .row .amt { font-family: Anton, sans-serif; font-size: 20px; line-height: 1; text-align: right; }
+  .row .right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .row .nm { font-weight: 800; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .sub { font-size: 12px; color: var(--muted); }
+  .row .st { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 8px; white-space: nowrap; }
+  .st.today { background: #111; color: #fff; }
+  .st.soon { color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .st.soon svg { width: 12px; height: 12px; }
+  .st.gone { color: var(--muted); text-decoration: line-through; }
+  .row.locked .chipc { filter: grayscale(.2); }
+  .row.past { opacity: .45; }
+  .row.empty { opacity: .35; }
+  .row.today { outline: 2px solid var(--sheet-ink); }
+
+  .month { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .month .h { font-size: 11px; font-weight: 800; color: var(--muted); text-align: center; padding-bottom: 4px; }
+  .cell {
+    aspect-ratio: 1 / 1.5; border-radius: 12px; background: var(--chip); padding: 4px;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 3px; font-size: 12px; font-weight: 800; text-align: left; min-width: 0;
+  }
+  .cell .n { font-size: 11px; line-height: 1; padding: 1px 0 0 2px; }
+  .cell .lg {                      /* placa con el logotipo de la marca */
+    flex: 1; min-height: 0; border-radius: 7px; background: #fff; padding: 3px;
+    display: grid; place-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.15);
+  }
+  .cell .lg.dark { background: #141414; }
+  .cell .lg img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .cell .v { font-family: Anton, sans-serif; font-weight: 400; font-size: clamp(10px, 3vw, 14px); line-height: 1; overflow: hidden; white-space: nowrap; text-align: center; }
+  .cell.out { visibility: hidden; }
+  .cell.none { opacity: .35; }
+  .cell.past { opacity: .4; }
+  .cell.today { outline: 2px solid var(--sheet-ink); outline-offset: 1px; }
+
+  .detail { padding: 6px 0 4px; }
+  .detail .big2 { position: relative; overflow: hidden; height: 190px; border-radius: 20px; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; padding: 16px 18px; background-size: cover; background-position: center; }
+  .detail .big2 b { font-family: Anton, sans-serif; font-weight: 400; font-size: 64px; line-height: 1; position: relative; text-shadow: 0 4px 20px rgba(0,0,0,.25); }
+  .detail .big2 .logo { height: 44px; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; position: relative; box-shadow: none; }
+  .detail h3 { font-size: 24px; font-weight: 800; margin-top: 8px; }
+  .detail p { font-size: 15px; line-height: 1.45; margin-top: 10px; color: var(--sheet-ink); }
+  .detail .meta { font-size: 13px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+  .detail .meta a { color: inherit; }
+  .detail .code { margin-top: 14px; display: inline-flex; gap: 10px; align-items: center; padding: 10px 14px; border: 2px dashed var(--sheet-ink); border-radius: 12px; font-weight: 800; letter-spacing: .1em; }
+  .detail .back { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; }
+  .detail .lockmsg { margin-top: 16px; padding: 14px; border-radius: 14px; background: var(--chip); font-weight: 600; font-size: 14px; display: flex; gap: 8px; align-items: center; }
+  .detail .lockmsg svg { width: 18px; height: 18px; flex: none; }
+  .detail .go { margin-top: 16px; height: 56px; border-radius: 16px; background: var(--sheet-ink); color: var(--sheet); font-weight: 800; width: 100%; }
+
+  .nodeal { height: 100dvh; display: grid; place-items: center; text-align: center; padding: 24px; }
+</style>
+</head>
+<body>
+<script src="intro.js"></script>
+<div class="photo" id="photo"></div>
+<main class="stage" id="stage">
+  <header class="top">
+    <img class="samplia" id="sampliaLogo" src="assets/brand/samplia-logo-white.png" alt="Samplia">
+    <span class="when"><span><span class="dot"></span>Descuento de hoy</span><span id="today"></span></span>
+  </header>
+  <section class="hero" id="hero"></section>
+  <section class="bottom">
+    <div class="timer"><span>Termina en <b id="countdown">--:--:--</b></span><button class="info" id="infoBtn" aria-label="Condiciones">i</button></div>
+    <button class="btn primary" id="getBtn">
+      <span id="getLabel">Conseguir descuento</span>
+      <svg id="getIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>
+    </button>
+    <button class="btn ghost" id="calBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Próximos descuentos
+    </button>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Calendario de descuentos">
+  <div class="grab"></div>
+  <div class="sheet-head" id="sheetHead">
+    <div class="seg" role="tablist">
+      <button id="tabWeek" class="on" role="tab">Semana</button>
+      <button id="tabMonth" role="tab">Mes</button>
+    </div>
+  </div>
+  <div class="range" id="range"></div>
+  <div class="body" id="body"></div>
+</aside>
+<div class="loader" id="loader" role="status" aria-live="polite"></div>
+<div class="qr" id="qr" role="dialog" aria-modal="true" aria-label="Código QR para canjear en tienda"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="deals.js"></script>
+<script>
+(() => {
+  const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  const $ = id => document.getElementById(id);
+  const byDate = Object.fromEntries(DEALS.map(d => [d.date, d]));
+  const STORE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0zM5 13v7h14v-7M10 20v-5h4v5"/></svg>';
+  const QRICON = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>';
+
+  // ---------- Fechas (zona local; ?date=YYYY-MM-DD para simular otro día) ----------
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const mondayOf = d => addDays(d, -((d.getDay() + 6) % 7));
+  const fmt = (d, o) => d.toLocaleDateString("es-ES", o);
+
+  const forced = new URLSearchParams(location.search).get("date");
+  const now = () => {
+    if (!forced) return new Date();
+    const t = new Date(); const f = parse(forced);
+    f.setHours(t.getHours(), t.getMinutes(), t.getSeconds()); return f;
+  };
+  const todayISO = iso(now());
+  const status = s => s < todayISO ? "past" : s === todayISO ? "today" : "soon";
+
+  // ---------- Pantalla principal ----------
+  const deal = byDate[todayISO];
+  $("today").textContent = fmt(now(), { weekday: "short", day: "numeric", month: "short" });
+
+  if (!deal) {
+    $("stage").innerHTML = '<div class="nodeal"><div><div class="big" style="font-size:96px">—</div><p style="margin-top:12px;font-weight:600">Hoy no hay descuento programado.</p></div></div>';
+  } else {
+    paint(deal.color, deal.ink);
+    if (deal.bg) {
+      const img = new Image();
+      img.alt = ""; img.onload = () => img.classList.add("ready"); img.src = deal.bg;
+      $("photo").appendChild(img);
+    }
+    const inStore = deal.channel === "tienda";
+    $("hero").innerHTML = `${logoTag(deal)}${inStore ? `<span class="store-pill">${STORE}En tienda</span>` : ""}<div class="big">${deal.big}</div><div class="tag">${deal.tag}</div>`;
+    if (inStore) { $("getLabel").textContent = "Mostrar QR en tienda"; $("getIcon").outerHTML = QRICON; }
+    const enter = () => $("hero").classList.add("enter");
+    window.__introActive ? addEventListener("intro:done", enter, { once: true }) : enter();
+    if (deal.code) $("getLabel").textContent = `Copiar ${deal.code} y comprar`;
+  }
+
+  function logoTag(x) {
+    return `<div class="logo ${x.logoDark ? "dark" : ""}"><img src="${x.logo}" alt="${x.brand}"></div>`;
+  }
+
+  // Texto claro en la oferta → logotipo con letras blancas; texto oscuro → logotipo original
+  function isLight(hex) { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) > 150; }
+
+  function paint(bg, ink) {
+    $("sampliaLogo").src = isLight(ink) ? "assets/brand/samplia-logo-white.png" : "assets/brand/samplia-logo.png";
+    document.documentElement.style.setProperty("--bg", bg);
+    document.documentElement.style.setProperty("--ink", ink);
+    document.body.style.color = ink;
+    document.querySelector('meta[name="theme-color"]').content = bg;
+  }
+
+  // Cuenta atrás hasta medianoche
+  const tick = () => {
+    const n = now(); const end = new Date(n); end.setHours(24, 0, 0, 0);
+    let s = Math.max(0, Math.floor((end - n) / 1000));
+    const h = Math.floor(s / 3600); s %= 3600;
+    $("countdown").textContent = [h, Math.floor(s / 60), s % 60].map(v => String(v).padStart(2, "0")).join(":");
+  };
+  tick(); setInterval(tick, 1000);
+
+  // Loader con el logo 3D: se muestra al pulsar y después se navega a la tienda en la misma pestaña
+  // (navegar tras una espera con window.open lo bloquearían los navegadores como ventana emergente).
+  const LOADER_MS = 1300;
+  function showLoader(x, copied) {
+    const L = $("loader");
+    let sides = "";
+    for (let i = 16; i >= 1; i--) sides += `<img class="side" src="assets/brand/samplia-icon.png" alt="" style="transform:translateZ(${-i * 1.1}px)">`;
+    L.innerHTML = `<div class="box">
+      <div class="obj"><img class="side back" src="assets/brand/samplia-icon.png" alt="">${sides}
+        <img class="front" src="assets/brand/samplia-icon.png" alt=""><div class="shine"></div></div>
+      <div class="floor"></div>
+      <img class="wordmark" src="assets/brand/samplia-wordmark.png" alt="Samplia">
+      <div class="msg">Abriendo ${x.brand}…${copied ? `<small>Código ${x.code} copiado</small>` : x.code ? `<small>Tu código: ${x.code}</small>` : ""}</div>
+      <div class="bar"><i></i></div></div>`;
+    L.style.setProperty("--dur", LOADER_MS + "ms");
+    L.classList.add("on");
+  }
+  // Al volver atrás desde la tienda (caché de página), quitar el loader
+  addEventListener("pageshow", () => $("loader").classList.remove("on"));
+
+  // ---------- QR para canjear en tienda física ----------
+  // Código de cupón Samplia (demostración): SMP-<MARCA>-<MMDD>. Para que lo acepte la caja hace falta el acuerdo con la marca.
+  const qrCode = x => "SMP-" + x.brand.normalize("NFD").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 10) + "-" + x.date.slice(5).replace("-", "");
+  function showQR(x) {
+    const code = qrCode(x);
+    let svg = "";
+    try { const q = qrcode(0, "M"); q.addData(`SAMPLIA|${code}|${x.date}`); q.make(); svg = q.createSvgTag({ cellSize: 6, margin: 0, scalable: true }); }
+    catch { svg = `<div style="font-weight:800">${code}</div>`; }      // sin librería (sin conexión): se muestra solo el código
+    const maps = "https://www.google.com/maps/search/" + encodeURIComponent((x.store || x.brand));
+    $("qr").innerHTML = `<div class="card" style="--qr:${x.color}">
+      <div class="head"><img src="${x.logo}" alt="${x.brand}"><span class="big3" style="color:${x.color}">${x.big}</span></div>
+      <div class="code-box">${svg}</div>
+      <div class="code-txt">${code}</div>
+      <div class="where">Enséñalo en caja · ${x.store || x.brand}</div>
+      <div class="valid">Válido hoy hasta las 23:59</div>
+      <div class="demo">QR de demostración</div>
+      <div class="acts"><a href="${maps}" target="_blank" rel="noopener">Tiendas cerca</a><button id="qrClose">Cerrar</button></div></div>`;
+    $("qr").classList.add("on");
+    $("qrClose").onclick = () => $("qr").classList.remove("on");
+  }
+  $("qr").onclick = e => { if (e.target.id === "qr") $("qr").classList.remove("on"); };
+  // Para demos y capturas: ?qr=1 abre directamente el QR si la oferta del día es en tienda
+  if (new URLSearchParams(location.search).get("qr") === "1" && deal && deal.channel === "tienda") showQR(deal);
+
+  let going = false;
+  $("getBtn").onclick = async () => {
+    if (!deal || going) return;
+    if (deal.channel === "tienda") return showQR(deal);
+    going = true;
+    let copied = false;
+    if (deal.code) { try { await navigator.clipboard.writeText(deal.code); copied = true; } catch {} }
+    showLoader(deal, copied);
+    setTimeout(() => { going = false; location.assign(deal.url); }, LOADER_MS);
+  };
+
+  // ---------- Hoja: calendario ----------
+  let view = "week";
+  let anchor = mondayOf(parse(todayISO));     // lunes de la semana visible
+  let monthAnchor = parse(todayISO); monthAnchor.setDate(1);
+  const first = parse(DEALS[0].date), last = parse(DEALS[DEALS.length - 1].date);
+
+  const open = () => { $("scrim").classList.add("open"); $("sheet").classList.add("open"); render(); };
+  const close = () => { $("scrim").classList.remove("open"); $("sheet").classList.remove("open"); };
+  $("calBtn").onclick = open;
+  $("infoBtn").onclick = () => { open(); if (deal) showDetail(deal.date); };
+  $("scrim").onclick = close;
+  document.addEventListener("keydown", e => e.key === "Escape" && close());
+
+  // Para demos y capturas: ?cal=week | ?cal=month abre el calendario directamente
+  const calParam = new URLSearchParams(location.search).get("cal");
+  if (calParam === "week" || calParam === "month") { view = calParam; open(); }
+
+  $("tabWeek").onclick = () => { view = "week"; render(); };
+  $("tabMonth").onclick = () => { view = "month"; render(); };
+  function render() {
+    $("sheetHead").style.display = "";
+    $("tabWeek").classList.toggle("on", view === "week");
+    $("tabMonth").classList.toggle("on", view === "month");
+    view === "week" ? renderPager(weekPages(), anchor, weekHTML, weekLabel, d => anchor = d)
+                    : renderPager(monthPages(), monthAnchor, monthHTML, monthLabel, d => monthAnchor = d);
+  }
+
+  // Páginas disponibles: todas las semanas / meses que cubre el calendario (y el de hoy)
+  function weekPages() {
+    const out = [], a = mondayOf(new Date(Math.min(first, parse(todayISO)))), b = mondayOf(new Date(Math.max(last, parse(todayISO))));
+    for (let d = a; d <= b; d = addDays(d, 7)) out.push(d);
+    return out;
+  }
+  function monthPages() {
+    const out = [], lo = new Date(Math.min(first, parse(todayISO))), hi = new Date(Math.max(last, parse(todayISO)));
+    for (let d = new Date(lo.getFullYear(), lo.getMonth(), 1); d <= hi; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) out.push(d);
+    return out;
+  }
+  function weekLabel(a) { return (iso(a) === iso(mondayOf(parse(todayISO))) ? "Esta semana · " : "") + `${fmt(a, { day: "numeric", month: "short" })} – ${fmt(addDays(a, 6), { day: "numeric", month: "short" })}`; }
+  function monthLabel(m) { return fmt(m, { month: "long", year: "numeric" }); }
+
+  // Carrusel vertical con scroll-snap: se pasa de semana/mes deslizando arriba/abajo, sin flechas ni barra visible
+  function renderPager(pages, current, html, label, setCurrent) {
+    let idx = Math.max(0, pages.findIndex(p => iso(p) === iso(current)));
+    $("body").innerHTML = `<div class="vwrap"><div class="pager" id="pager">${pages.map(p => `<div class="page">${html(p)}</div>`).join("")}</div>
+      ${pages.length > 1 ? `<div class="dots">${pages.map((_, i) => `<i class="${i === idx ? "on" : ""}"></i>`).join("")}</div>` : ""}</div>`;
+    const pager = $("pager"), dots = $("body").querySelectorAll(".dots i");
+    // Alto de página = la más alta (sin pasar del espacio disponible en la hoja)
+    const fit = () => {
+      pager.style.removeProperty("--ph");
+      const tallest = Math.max(...[...pager.children].map(c => c.scrollHeight));
+      const room = innerHeight * 0.88 - $("body").offsetTop - 28;
+      pager.style.setProperty("--ph", Math.min(tallest, room) + "px");
+      pager.scrollTop = idx * pager.clientHeight;
+    };
+    const sync = i => { idx = i; setCurrent(pages[i]); $("range").textContent = label(pages[i]); dots.forEach((d, j) => d.classList.toggle("on", j === i)); };
+    sync(idx);
+    requestAnimationFrame(fit);
+    pager.addEventListener("scroll", () => {
+      const i = Math.round(pager.scrollTop / pager.clientHeight);
+      if (i !== idx && pages[i]) sync(i);
+    }, { passive: true });
+    pager.tabIndex = 0;
+    pager.onkeydown = e => {
+      const dir = e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0;
+      if (dir) { e.preventDefault(); pager.scrollBy({ top: dir * pager.clientHeight, behavior: "smooth" }); }
+    };
+    bindRows();
+  }
+
+  function weekHTML(a) {
+    let html = '<div class="week">';
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(a, i), k = iso(d), x = byDate[k], st = status(k);
+      const day = `<div class="d"><small>${fmt(d, { weekday: "short" })}</small><b>${d.getDate()}</b></div>`;
+      if (!x) { html += `<div class="row empty">${day}<div class="sub">Sin descuento</div><span></span></div>`; continue; }
+      const badge = st === "today" ? '<span class="st today">Hoy</span>'
+        : st === "past" ? '<span class="st gone">Terminado</span>'
+        : `<span class="st soon">${LOCK}${fmt(d, { weekday: "short" })}</span>`;
+      html += `<button class="row ${st} ${st === "soon" ? "locked" : ""}" data-k="${k}">${day}
+        <div class="sw"><span class="chipc ${x.logoDark ? "dark" : ""}"><img src="${x.logo}" alt="" loading="lazy"></span>
+        <div style="min-width:0"><div class="nm">${x.brand}</div><div class="sub">${x.channel === "tienda" ? `<span class="st-tag">${STORE}Tienda</span> ` : ""}${x.tag}</div></div></div>
+        <div class="right"><span class="amt">${x.big}</span>${badge}</div></button>`;
+    }
+    return html + "</div>";
+  }
+
+  function monthHTML(firstM) {
+    const y = firstM.getFullYear(), m = firstM.getMonth(), lastM = new Date(y, m + 1, 0);
+    let html = '<div class="month">' + ["L", "M", "X", "J", "V", "S", "D"].map(h => `<div class="h">${h}</div>`).join("");
+    const lead = (firstM.getDay() + 6) % 7;
+    for (let i = 0; i < lead; i++) html += '<div class="cell out"></div>';
+    for (let n = 1; n <= lastM.getDate(); n++) {
+      const k = iso(new Date(y, m, n)), x = byDate[k], st = status(k);
+      html += x
+        ? `<button class="cell ${st}" data-k="${k}" style="background:${x.color};color:${x.ink}" aria-label="${n}: ${x.brand} ${x.big}"><span class="n">${n}</span>${x.channel === "tienda" ? `<span class="shop" title="En tienda">${STORE}</span>` : ""}<span class="lg ${x.logoDark ? "dark" : ""}"><img src="${x.logo}" alt="" loading="lazy"></span><span class="v">${x.big}</span></button>`
+        : `<div class="cell none"><span class="n">${n}</span></div>`;
+    }
+    return html + "</div>";
+  }
+
+  function bindRows() { $("body").querySelectorAll("[data-k]").forEach(el => el.onclick = () => showDetail(el.dataset.k)); }
+
+  function showDetail(k) {
+    const x = byDate[k], st = status(k), d = parse(k);
+    $("sheetHead").style.display = "none";
+    $("range").textContent = fmt(d, { weekday: "long", day: "numeric", month: "long" });
+    const until = fmt(parse(x.validUntil), { day: "numeric", month: "long" });
+    const action = st === "today"
+      ? `${x.code ? `<div class="code">${x.code}</div>` : ""}<button class="go" id="goBtn">${x.channel === "tienda" ? "Mostrar QR en tienda" : `Ir a ${x.brand}`}</button>`
+      : st === "soon"
+        ? `<div class="lockmsg">${LOCK}Se activa el ${fmt(d, { weekday: "long", day: "numeric" })}</div>`
+        : `<div class="lockmsg">Este descuento ya terminó en la app.</div>`;
+    $("body").innerHTML = `<div class="detail">
+      <button class="back" id="backBtn">‹ Volver</button>
+      <div class="big2" style="color:${x.ink};background-image:linear-gradient(180deg, color-mix(in srgb, ${x.color} 20%, transparent), ${x.color} 92%), url('${x.bg}')">${logoTag(x)}<b>${x.big}</b></div>
+      <h3>${x.brand}</h3>
+      <p>${x.terms}</p>
+      <div class="meta">Vigente hasta el ${until} · <a href="${x.source}" target="_blank" rel="noopener">fuente</a></div>
+      ${action}</div>`;
+    $("backBtn").onclick = render;
+    const go = $("goBtn"); if (go) go.onclick = () => $("getBtn").onclick();
+  }
+})();
+</script>
+</body>
+</html>
